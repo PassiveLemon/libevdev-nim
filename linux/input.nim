@@ -1072,7 +1072,7 @@ type
 ## 
 
 type
-  INNER_C_UNION_3762273487* = object {.union.}
+  INNER_C_UNION_3762273487* = object
     constant*: ff_constant_effect
     ramp*: ff_ramp_effect
     periodic*: ff_periodic_effect

@@ -1,24 +1,31 @@
-# libevdev.nim
+# libevdev-nim
 
-This is a raw wrapper around the libevdev library, used for reading events
-from the Linux event subsystem, such as keyboards, mice and touchscreens.
+This is a raw wrapper around the libevdev library, used for reading/writing events
+to and from the Linux event subsystem, such as keyboards, mice and touchscreens.
 
-https://www.freedesktop.org/wiki/Software/libevdev/
-
-I use it for reading events from an ads7846 touchscreen on a Raspberry Pi.
+https://www.freedesktop.org/wiki/software/libevdev/
 
 ## Example:
-
 ```nimrod
-import strutils, os, posix
-import libevdev, linux/input
+import
+  std / [
+    os, 
+    strutils, 
+    posix
+  ]
+
+import
+  ./libevdev,
+  ./linux/input
+
 
 proc main() =
-  var found = false
-  var evdev: ptr libevdev
+  var
+    found = false
+    evdev: ptr libevdev
 
   for device in walkPattern("/dev/input/event*"):
-    let fd = open(device, O_RDONLY or O_NONBLOCK)
+    let fd = open(cstring(device), O_RDONLY or O_NONBLOCK)
     if fd < 0:
       raiseOSError(OSErrorCode(errno), "could not open $1" % device)
 
@@ -43,8 +50,9 @@ proc main() =
         $libevdev_event_code_get_name(ev.ev_type, ev.code),
         $ev.value]
 
+
 main()
 ```
 
-Assuming you are a member of the "input" group, you can run this with:
-    ```nim c -r --passL:"-levdev" example.nim```
+Assuming you are a member of the "input" group, you can run this with: `nim c -r example.nim`
+

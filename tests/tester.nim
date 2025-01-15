@@ -1,13 +1,19 @@
+import 
+  std / [
+    os,
+    strutils,
+    posix,
+    unittest
+  ]
 
-import unittest
-import posix, strutils, os
-import libevdev
+import ../libevdev
 
-const
-  device = "/dev/input/event0"
+
+const device = "/dev/input/event0"
+  
 
 proc initevdev(device: string): ptr libevdev =
-  let fd = open(device, O_RDONLY or O_NONBLOCK)
+  let fd = open(cstring(device), O_RDONLY or O_NONBLOCK)
   if fd < 0:
     raiseOSError(OSErrorCode(errno), "could not open $1" % device)
 

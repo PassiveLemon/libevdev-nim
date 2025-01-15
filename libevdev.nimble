@@ -1,14 +1,12 @@
 # Package
-
-version       = "0.1.0"
-author        = "Luke Diamand"
-description   = "Wrapper for <linux/fb.h> framebuffer ioctls"
+version       = "0.2.0"
+author        = "PassiveLemon"
+description   = "Wrapper for libevdev"
 license       = "MIT"
 
 # Dependencies
+requires "nim >= 2.2.0"
 
-requires "nim >= 0.15.3"
-
-
+# Tests
 task test, "Runs the test suite":
   exec "nim c -r tests/tester"

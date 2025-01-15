@@ -1,12 +1,22 @@
-import strutils, os, posix
-import libevdev, linux/input
+import
+  std / [
+    os, 
+    strutils, 
+    posix
+  ]
+
+import
+  ./libevdev,
+  ./linux/input
+
 
 proc main() =
-  var found = false
-  var evdev: ptr libevdev
+  var
+    found = false
+    evdev: ptr libevdev
 
   for device in walkPattern("/dev/input/event*"):
-    let fd = open(device, O_RDONLY or O_NONBLOCK)
+    let fd = open(cstring(device), O_RDONLY or O_NONBLOCK)
     if fd < 0:
       raiseOSError(OSErrorCode(errno), "could not open $1" % device)
 
