@@ -20,8 +20,9 @@
 ##  OF THIS SOFTWARE.
 ## 
 
-import linux/input
+const LIBEVDEV = "libevdev.so"
 
+import ./linux/input
 
 ## *
 ##  @mainpage
@@ -735,19 +736,20 @@ type
 ## *
 ##  @ingroup init
 ## 
-##  Initialize a new libevdev device. This function only allocates the
-##  required memory and initializes the struct to sane default values.
-##  To actually hook up the device to a kernel device, use
-##  libevdev_set_fd().
+##  Initialize a new libevdev device. 
 ## 
-##  Memory allocated through libevdev_new() must be released by the
-##  caller with libevdev_free().
+##  This function only allocates the required memory and initializes the struct
+##  to sane default values. To actually hook up the device to a kernel device,
+##  use libevdev_set_fd().
+##
+##  Memory allocated through libevdev_new() must be released by the caller with
+##  libevdev_free().
 ## 
 ##  @see libevdev_set_fd
 ##  @see libevdev_free
 ## 
+proc libevdev_new*(): ptr libevdev {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_new*(): ptr libevdev {.importc, header: "<libevdev.h>".}
 ## *
 ##  @ingroup init
 ## 
@@ -770,8 +772,8 @@ proc libevdev_new*(): ptr libevdev {.importc, header: "<libevdev.h>".}
 ## 
 ##  @see libevdev_free
 ## 
+proc libevdev_new_from_fd*(fd: cint; dev: ptr ptr libevdev): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_new_from_fd*(fd: cint; dev: ptr ptr libevdev): cint {.importc.}
 ## *
 ##  @ingroup init
 ## 
@@ -785,12 +787,11 @@ proc libevdev_new_from_fd*(fd: cint; dev: ptr ptr libevdev): cint {.importc.}
 ## 
 ##  @note This function may be called before libevdev_set_fd().
 ## 
+proc libevdev_free*(dev: ptr libevdev) {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_free*(dev: ptr libevdev) {.importc.}
 ## *
 ##  @ingroup logging
 ## 
-
 type
   libevdev_log_priority* = enum
     LIBEVDEV_LOG_ERROR = 10,    ## *< critical errors and application bugs
@@ -815,7 +816,6 @@ when defined(later):
   ## 
   ##  @see libevdev_set_log_function
   ## 
-  
   type
     libevdev_log_func_t* = proc (priority: libevdev_log_priority; data: pointer;
                               file: cstring; line: cint; `func`: cstring;
@@ -839,8 +839,8 @@ when defined(later):
   ##  @deprecated Use per-context logging instead, see
   ##  libevdev_set_device_log_function().
   ## 
-  
   proc libevdev_set_log_function*(logfunc: libevdev_log_func_t; data: pointer)
+  
   ## *
   ##  @ingroup logging
   ## 
@@ -853,8 +853,8 @@ when defined(later):
   ##  @deprecated Use per-context logging instead, see
   ##  libevdev_set_device_log_function().
   ## 
-    
   proc libevdev_set_log_priority*(priority: libevdev_log_priority)
+
   ## *
   ##  @ingroup logging
   ## 
@@ -866,8 +866,8 @@ when defined(later):
   ##  @deprecated Use per-context logging instead, see
   ##  libevdev_set_device_log_function().
   ## 
-  
   proc libevdev_get_log_priority*(): libevdev_log_priority
+
   ## *
   ##  @ingroup logging
   ## 
@@ -887,7 +887,6 @@ when defined(later):
   ##  @see libevdev_set_log_function
   ##  @since 1.3
   ## 
-  
   type
     libevdev_device_log_func_t* = proc (dev: ptr libevdev;
                                      priority: libevdev_log_priority; data: pointer;
@@ -915,15 +914,11 @@ when defined(later):
   ##  @note This function may be called before libevdev_set_fd().
   ##  @since 1.3
   ## 
-  
-  proc libevdev_set_device_log_function*(dev: ptr libevdev;
-                                        logfunc: libevdev_device_log_func_t;
-                                        priority: libevdev_log_priority;
-                                        data: pointer)
+  proc libevdev_set_device_log_function*(dev: ptr libevdev; logfunc: libevdev_device_log_func_t; priority: libevdev_log_priority; data: pointer)
+
 ## *
 ##  @ingroup init
 ## 
-
 type
   libevdev_grab_mode* = enum
     LIBEVDEV_GRAB = 3,          ## *< Grab the device if not currently grabbed
@@ -948,8 +943,8 @@ type
 ##  @return 0 if the device was successfull grabbed or ungrabbed, or a
 ##  negative errno in case of failure.
 ## 
+proc libevdev_grab*(dev: ptr libevdev; grab: libevdev_grab_mode): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_grab*(dev: ptr libevdev; grab: libevdev_grab_mode): cint {.importc.}
 ## *
 ##  @ingroup init
 ## 
@@ -982,8 +977,8 @@ proc libevdev_grab*(dev: ptr libevdev; grab: libevdev_grab_mode): cint {.importc
 ##  @see libevdev_new
 ##  @see libevdev_free
 ## 
+proc libevdev_set_fd*(dev: ptr libevdev; fd: cint): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_set_fd*(dev: ptr libevdev; fd: cint): cint {.importc.}
 ## *
 ##  @ingroup init
 ## 
@@ -1019,8 +1014,8 @@ proc libevdev_set_fd*(dev: ptr libevdev; fd: cint): cint {.importc.}
 ## 
 ##  @see libevdev_set_fd
 ## 
+proc libevdev_change_fd*(dev: ptr libevdev; fd: cint): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_change_fd*(dev: ptr libevdev; fd: cint): cint {.importc.}
 ## *
 ##  @ingroup init
 ## 
@@ -1029,12 +1024,11 @@ proc libevdev_change_fd*(dev: ptr libevdev; fd: cint): cint {.importc.}
 ##  @return The previously set fd, or -1 if none had been set previously.
 ##  @note This function may be called before libevdev_set_fd().
 ## 
+proc libevdev_get_fd*(dev: ptr libevdev): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_get_fd*(dev: ptr libevdev): cint {.importc.}
 ## *
 ##  @ingroup events
 ## 
-
 type
   libevdev_read_status* = enum ## *
                             ##  libevdev_next_event() has finished without an error
@@ -1103,8 +1097,8 @@ type
 ## 
 ##  @note This function is signal-safe.
 ## 
+proc libevdev_next_event*(dev: ptr libevdev; flags: cuint; ev: ptr input_event): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_next_event*(dev: ptr libevdev; flags: cuint; ev: ptr input_event): cint {.importc.}
 ## *
 ##  @ingroup events
 ## 
@@ -1127,8 +1121,8 @@ proc libevdev_next_event*(dev: ptr libevdev; flags: cuint; ev: ptr input_event):
 ## 
 ##  @note This function is signal-safe.
 ## 
+proc libevdev_has_event_pending*(dev: ptr libevdev): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_has_event_pending*(dev: ptr libevdev): cint {.importc.}
 ## *
 ##  @ingroup bits
 ## 
@@ -1143,8 +1137,8 @@ proc libevdev_has_event_pending*(dev: ptr libevdev): cint {.importc.}
 ## 
 ##  @note This function is signal-safe.
 ## 
+proc libevdev_get_name*(dev: ptr libevdev): cstring {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_get_name*(dev: ptr libevdev): cstring {.importc.}
 ## *
 ##  @ingroup kernel
 ## 
@@ -1158,8 +1152,8 @@ proc libevdev_get_name*(dev: ptr libevdev): cstring {.importc.}
 ##  @note This function may be called before libevdev_set_fd(). A call to
 ##  libevdev_set_fd() will overwrite any previously set value.
 ## 
+proc libevdev_set_name*(dev: ptr libevdev; name: cstring) {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_set_name*(dev: ptr libevdev; name: cstring) {.importc.}
 ## *
 ##  @ingroup bits
 ## 
@@ -1175,8 +1169,8 @@ proc libevdev_set_name*(dev: ptr libevdev; name: cstring) {.importc.}
 ## 
 ##  @note This function is signal safe.
 ## 
+proc libevdev_get_phys*(dev: ptr libevdev): cstring {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_get_phys*(dev: ptr libevdev): cstring {.importc.}
 ## *
 ##  @ingroup kernel
 ## 
@@ -1190,8 +1184,8 @@ proc libevdev_get_phys*(dev: ptr libevdev): cstring {.importc.}
 ##  @note This function may be called before libevdev_set_fd(). A call to
 ##  libevdev_set_fd() will overwrite any previously set value.
 ## 
+proc libevdev_set_phys*(dev: ptr libevdev; phys: cstring) {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_set_phys*(dev: ptr libevdev; phys: cstring) {.importc.}
 ## *
 ##  @ingroup bits
 ## 
@@ -1205,8 +1199,8 @@ proc libevdev_set_phys*(dev: ptr libevdev; phys: cstring) {.importc.}
 ## 
 ##  @note This function is signal safe.
 ## 
+proc libevdev_get_uniq*(dev: ptr libevdev): cstring {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_get_uniq*(dev: ptr libevdev): cstring {.importc.}
 ## *
 ##  @ingroup kernel
 ## 
@@ -1220,8 +1214,8 @@ proc libevdev_get_uniq*(dev: ptr libevdev): cstring {.importc.}
 ##  @note This function may be called before libevdev_set_fd(). A call to
 ##  libevdev_set_fd() will overwrite any previously set value.
 ## 
+proc libevdev_set_uniq*(dev: ptr libevdev; uniq: cstring) {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_set_uniq*(dev: ptr libevdev; uniq: cstring) {.importc.}
 ## *
 ##  @ingroup bits
 ## 
@@ -1231,8 +1225,8 @@ proc libevdev_set_uniq*(dev: ptr libevdev; uniq: cstring) {.importc.}
 ## 
 ##  @note This function is signal-safe.
 ## 
+proc libevdev_get_id_product*(dev: ptr libevdev): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_get_id_product*(dev: ptr libevdev): cint {.importc.}
 ## *
 ##  @ingroup kernel
 ## 
@@ -1242,8 +1236,8 @@ proc libevdev_get_id_product*(dev: ptr libevdev): cint {.importc.}
 ##  @note This function may be called before libevdev_set_fd(). A call to
 ##  libevdev_set_fd() will overwrite any previously set value.
 ## 
+proc libevdev_set_id_product*(dev: ptr libevdev; product_id: cint) {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_set_id_product*(dev: ptr libevdev; product_id: cint) {.importc.}
 ## *
 ##  @ingroup bits
 ## 
@@ -1252,9 +1246,9 @@ proc libevdev_set_id_product*(dev: ptr libevdev; product_id: cint) {.importc.}
 ##  @return The device's vendor ID
 ## 
 ##  @note This function is signal-safe.
-## 
+##
+proc libevdev_get_id_vendor*(dev: ptr libevdev): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_get_id_vendor*(dev: ptr libevdev): cint {.importc.}
 ## *
 ##  @ingroup kernel
 ## 
@@ -1264,8 +1258,8 @@ proc libevdev_get_id_vendor*(dev: ptr libevdev): cint {.importc.}
 ##  @note This function may be called before libevdev_set_fd(). A call to
 ##  libevdev_set_fd() will overwrite any previously set value.
 ## 
+proc libevdev_set_id_vendor*(dev: ptr libevdev; vendor_id: cint) {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_set_id_vendor*(dev: ptr libevdev; vendor_id: cint) {.importc.}
 ## *
 ##  @ingroup bits
 ## 
@@ -1275,8 +1269,8 @@ proc libevdev_set_id_vendor*(dev: ptr libevdev; vendor_id: cint) {.importc.}
 ## 
 ##  @note This function is signal-safe.
 ## 
+proc libevdev_get_id_bustype*(dev: ptr libevdev): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_get_id_bustype*(dev: ptr libevdev): cint {.importc.}
 ## *
 ##  @ingroup kernel
 ## 
@@ -1286,8 +1280,8 @@ proc libevdev_get_id_bustype*(dev: ptr libevdev): cint {.importc.}
 ##  @note This function may be called before libevdev_set_fd(). A call to
 ##  libevdev_set_fd() will overwrite any previously set value.
 ## 
+proc libevdev_set_id_bustype*(dev: ptr libevdev; bustype: cint) {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_set_id_bustype*(dev: ptr libevdev; bustype: cint) {.importc.}
 ## *
 ##  @ingroup bits
 ## 
@@ -1297,8 +1291,8 @@ proc libevdev_set_id_bustype*(dev: ptr libevdev; bustype: cint) {.importc.}
 ## 
 ##  @note This function is signal-safe.
 ## 
+proc libevdev_get_id_version*(dev: ptr libevdev): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_get_id_version*(dev: ptr libevdev): cint {.importc.}
 ## *
 ##  @ingroup kernel
 ## 
@@ -1308,8 +1302,8 @@ proc libevdev_get_id_version*(dev: ptr libevdev): cint {.importc.}
 ##  @note This function may be called before libevdev_set_fd(). A call to
 ##  libevdev_set_fd() will overwrite any previously set value.
 ## 
+proc libevdev_set_id_version*(dev: ptr libevdev; version: cint) {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_set_id_version*(dev: ptr libevdev; version: cint) {.importc.}
 ## *
 ##  @ingroup bits
 ## 
@@ -1319,8 +1313,8 @@ proc libevdev_set_id_version*(dev: ptr libevdev; version: cint) {.importc.}
 ## 
 ##  @note This function is signal-safe.
 ## 
+proc libevdev_get_driver_version*(dev: ptr libevdev): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_get_driver_version*(dev: ptr libevdev): cint {.importc.}
 ## *
 ##  @ingroup bits
 ## 
@@ -1331,8 +1325,8 @@ proc libevdev_get_driver_version*(dev: ptr libevdev): cint {.importc.}
 ## 
 ##  @note This function is signal-safe
 ## 
+proc libevdev_has_property*(dev: ptr libevdev; prop: cuint): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_has_property*(dev: ptr libevdev; prop: cuint): cint {.importc.}
 ## *
 ##  @ingroup kernel
 ## 
@@ -1344,8 +1338,8 @@ proc libevdev_has_property*(dev: ptr libevdev; prop: cuint): cint {.importc.}
 ##  @note This function may be called before libevdev_set_fd(). A call to
 ##  libevdev_set_fd() will overwrite any previously set value.
 ## 
+proc libevdev_enable_property*(dev: ptr libevdev; prop: cuint): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_enable_property*(dev: ptr libevdev; prop: cuint): cint {.importc.}
 ## *
 ##  @ingroup bits
 ## 
@@ -1356,8 +1350,8 @@ proc libevdev_enable_property*(dev: ptr libevdev; prop: cuint): cint {.importc.}
 ## 
 ##  @note This function is signal-safe.
 ## 
+proc libevdev_has_event_type*(dev: ptr libevdev; `type`: cuint): bool {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_has_event_type*(dev: ptr libevdev; `type`: cuint): bool {.importc.}
 ## *
 ##  @ingroup bits
 ## 
@@ -1369,8 +1363,8 @@ proc libevdev_has_event_type*(dev: ptr libevdev; `type`: cuint): bool {.importc.
 ## 
 ##  @note This function is signal-safe.
 ## 
+proc libevdev_has_event_code*(dev: ptr libevdev; `type`: cuint; code: cuint): bool {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_has_event_code*(dev: ptr libevdev; `type`: cuint; code: cuint): bool {.importc.}
 ## *
 ##  @ingroup bits
 ## 
@@ -1383,8 +1377,8 @@ proc libevdev_has_event_code*(dev: ptr libevdev; `type`: cuint; code: cuint): bo
 ## 
 ##  @note This function is signal-safe.
 ## 
+proc libevdev_get_abs_minimum*(dev: ptr libevdev; code: cuint): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_get_abs_minimum*(dev: ptr libevdev; code: cuint): cint {.importc.}
 ## *
 ##  @ingroup bits
 ## 
@@ -1397,8 +1391,8 @@ proc libevdev_get_abs_minimum*(dev: ptr libevdev; code: cuint): cint {.importc.}
 ## 
 ##  @note This function is signal-safe.
 ## 
+proc libevdev_get_abs_maximum*(dev: ptr libevdev; code: cuint): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_get_abs_maximum*(dev: ptr libevdev; code: cuint): cint {.importc.}
 ## *
 ##  @ingroup bits
 ## 
@@ -1411,8 +1405,8 @@ proc libevdev_get_abs_maximum*(dev: ptr libevdev; code: cuint): cint {.importc.}
 ## 
 ##  @note This function is signal-safe.
 ## 
+proc libevdev_get_abs_fuzz*(dev: ptr libevdev; code: cuint): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_get_abs_fuzz*(dev: ptr libevdev; code: cuint): cint {.importc.}
 ## *
 ##  @ingroup bits
 ## 
@@ -1425,8 +1419,8 @@ proc libevdev_get_abs_fuzz*(dev: ptr libevdev; code: cuint): cint {.importc.}
 ## 
 ##  @note This function is signal-safe.
 ## 
+proc libevdev_get_abs_flat*(dev: ptr libevdev; code: cuint): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_get_abs_flat*(dev: ptr libevdev; code: cuint): cint {.importc.}
 ## *
 ##  @ingroup bits
 ## 
@@ -1439,8 +1433,8 @@ proc libevdev_get_abs_flat*(dev: ptr libevdev; code: cuint): cint {.importc.}
 ## 
 ##  @note This function is signal-safe.
 ## 
+proc libevdev_get_abs_resolution*(dev: ptr libevdev; code: cuint): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_get_abs_resolution*(dev: ptr libevdev; code: cuint): cint {.importc.}
 ## *
 ##  @ingroup bits
 ## 
@@ -1454,8 +1448,8 @@ proc libevdev_get_abs_resolution*(dev: ptr libevdev; code: cuint): cint {.import
 ## 
 ##  @note This function is signal-safe.
 ## 
+proc libevdev_get_abs_info*(dev: ptr libevdev; code: cuint): ptr input_absinfo {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_get_abs_info*(dev: ptr libevdev; code: cuint): ptr input_absinfo {.importc.}
 ## *
 ##  @ingroup bits
 ## 
@@ -1478,8 +1472,8 @@ proc libevdev_get_abs_info*(dev: ptr libevdev; code: cuint): ptr input_absinfo {
 ## 
 ##  @see libevdev_get_slot_value
 ## 
+proc libevdev_get_event_value*(dev: ptr libevdev; `type`: cuint; code: cuint): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_get_event_value*(dev: ptr libevdev; `type`: cuint; code: cuint): cint {.importc.}
 ## *
 ##  @ingroup kernel
 ## 
@@ -1511,9 +1505,8 @@ proc libevdev_get_event_value*(dev: ptr libevdev; `type`: cuint; code: cuint): c
 ##  @see libevdev_set_slot_value
 ##  @see libevdev_get_event_value
 ## 
+proc libevdev_set_event_value*(dev: ptr libevdev; `type`: cuint; code: cuint; value: cint): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_set_event_value*(dev: ptr libevdev; `type`: cuint; code: cuint;
-                              value: cint): cint {.importc.}
 ## *
 ##  @ingroup bits
 ## 
@@ -1539,9 +1532,8 @@ proc libevdev_set_event_value*(dev: ptr libevdev; `type`: cuint; code: cuint;
 ## 
 ##  @see libevdev_fetch_slot_value
 ## 
+proc libevdev_fetch_event_value*(dev: ptr libevdev; `type`: cuint; code: cuint; value: ptr cint): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_fetch_event_value*(dev: ptr libevdev; `type`: cuint; code: cuint;
-                                value: ptr cint): cint {.importc.}
 ## *
 ##  @ingroup mt
 ## 
@@ -1562,8 +1554,8 @@ proc libevdev_fetch_event_value*(dev: ptr libevdev; `type`: cuint; code: cuint;
 ## 
 ##  @see libevdev_get_event_value
 ## 
+proc libevdev_get_slot_value*(dev: ptr libevdev; slot: cuint; code: cuint): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_get_slot_value*(dev: ptr libevdev; slot: cuint; code: cuint): cint {.importc.}
 ## *
 ##  @ingroup kernel
 ## 
@@ -1590,8 +1582,8 @@ proc libevdev_get_slot_value*(dev: ptr libevdev; slot: cuint; code: cuint): cint
 ##  @see libevdev_set_event_value
 ##  @see libevdev_get_slot_value
 ## 
+proc libevdev_set_slot_value*(dev: ptr libevdev; slot: cuint; code: cuint; value: cint): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_set_slot_value*(dev: ptr libevdev; slot: cuint; code: cuint; value: cint): cint {.importc.}
 ## *
 ##  @ingroup mt
 ## 
@@ -1617,9 +1609,8 @@ proc libevdev_set_slot_value*(dev: ptr libevdev; slot: cuint; code: cuint; value
 ## 
 ##  @note This function is signal-safe.
 ## 
+proc libevdev_fetch_slot_value*(dev: ptr libevdev; slot: cuint; code: cuint; value: ptr cint): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_fetch_slot_value*(dev: ptr libevdev; slot: cuint; code: cuint;
-                               value: ptr cint): cint {.importc.}
 ## *
 ##  @ingroup mt
 ## 
@@ -1633,8 +1624,8 @@ proc libevdev_fetch_slot_value*(dev: ptr libevdev; slot: cuint; code: cuint;
 ##  @note A device may provide ABS_MT_SLOT but a total number of 0 slots. Hence
 ##  the return value of -1 for "device does not provide slots at all"
 ## 
+proc libevdev_get_num_slots*(dev: ptr libevdev): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_get_num_slots*(dev: ptr libevdev): cint {.importc.}
 ## *
 ##  @ingroup mt
 ## 
@@ -1650,8 +1641,8 @@ proc libevdev_get_num_slots*(dev: ptr libevdev): cint {.importc.}
 ## 
 ##  @note This function is signal-safe.
 ## 
+proc libevdev_get_current_slot*(dev: ptr libevdev): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_get_current_slot*(dev: ptr libevdev): cint {.importc.}
 ## *
 ##  @ingroup kernel
 ## 
@@ -1663,8 +1654,8 @@ proc libevdev_get_current_slot*(dev: ptr libevdev): cint {.importc.}
 ##  @param code One of ABS_X, ABS_Y, ...
 ##  @param min The new minimum for this axis
 ## 
+proc libevdev_set_abs_minimum*(dev: ptr libevdev; code: cuint; min: cint) {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_set_abs_minimum*(dev: ptr libevdev; code: cuint; min: cint) {.importc.}
 ## *
 ##  @ingroup kernel
 ## 
@@ -1676,8 +1667,8 @@ proc libevdev_set_abs_minimum*(dev: ptr libevdev; code: cuint; min: cint) {.impo
 ##  @param code One of ABS_X, ABS_Y, ...
 ##  @param max The new maxium for this axis
 ## 
+proc libevdev_set_abs_maximum*(dev: ptr libevdev; code: cuint; max: cint) {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_set_abs_maximum*(dev: ptr libevdev; code: cuint; max: cint) {.importc.}
 ## *
 ##  @ingroup kernel
 ## 
@@ -1689,8 +1680,8 @@ proc libevdev_set_abs_maximum*(dev: ptr libevdev; code: cuint; max: cint) {.impo
 ##  @param code One of ABS_X, ABS_Y, ...
 ##  @param fuzz The new fuzz for this axis
 ## 
+proc libevdev_set_abs_fuzz*(dev: ptr libevdev; code: cuint; fuzz: cint) {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_set_abs_fuzz*(dev: ptr libevdev; code: cuint; fuzz: cint) {.importc.}
 ## *
 ##  @ingroup kernel
 ## 
@@ -1702,8 +1693,8 @@ proc libevdev_set_abs_fuzz*(dev: ptr libevdev; code: cuint; fuzz: cint) {.import
 ##  @param code One of ABS_X, ABS_Y, ...
 ##  @param flat The new flat for this axis
 ## 
+proc libevdev_set_abs_flat*(dev: ptr libevdev; code: cuint; flat: cint) {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_set_abs_flat*(dev: ptr libevdev; code: cuint; flat: cint) {.importc.}
 ## *
 ##  @ingroup kernel
 ## 
@@ -1715,8 +1706,8 @@ proc libevdev_set_abs_flat*(dev: ptr libevdev; code: cuint; flat: cint) {.import
 ##  @param code One of ABS_X, ABS_Y, ...
 ##  @param resolution The new axis resolution
 ## 
+proc libevdev_set_abs_resolution*(dev: ptr libevdev; code: cuint; resolution: cint) {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_set_abs_resolution*(dev: ptr libevdev; code: cuint; resolution: cint) {.importc.}
 ## *
 ##  @ingroup kernel
 ## 
@@ -1728,8 +1719,8 @@ proc libevdev_set_abs_resolution*(dev: ptr libevdev; code: cuint; resolution: ci
 ##  @param code One of ABS_X, ABS_Y, ...
 ##  @param abs The new absolute axis data (min, max, fuzz, flat, resolution)
 ## 
-
 proc libevdev_set_abs_info*(dev: ptr libevdev; code: cuint; abs: ptr input_absinfo) {.importc}
+
 ## *
 ##  @ingroup kernel
 ## 
@@ -1747,8 +1738,8 @@ proc libevdev_set_abs_info*(dev: ptr libevdev; code: cuint; abs: ptr input_absin
 ## 
 ##  @see libevdev_has_event_type
 ## 
+proc libevdev_enable_event_type*(dev: ptr libevdev; `type`: cuint): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_enable_event_type*(dev: ptr libevdev; `type`: cuint): cint {.importc.}
 ## *
 ##  @ingroup kernel
 ## 
@@ -1775,8 +1766,8 @@ proc libevdev_enable_event_type*(dev: ptr libevdev; `type`: cuint): cint {.impor
 ##  @see libevdev_has_event_type
 ##  @see libevdev_disable_event_type
 ## 
+proc libevdev_disable_event_type*(dev: ptr libevdev; `type`: cuint): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_disable_event_type*(dev: ptr libevdev; `type`: cuint): cint {.importc.}
 ## *
 ##  @ingroup kernel
 ## 
@@ -1810,9 +1801,8 @@ proc libevdev_disable_event_type*(dev: ptr libevdev; `type`: cuint): cint {.impo
 ## 
 ##  @see libevdev_enable_event_type
 ## 
+proc libevdev_enable_event_code*(dev: ptr libevdev; `type`: cuint; code: cuint; data: pointer): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_enable_event_code*(dev: ptr libevdev; `type`: cuint; code: cuint;
-                                data: pointer): cint {.importc.}
 ## *
 ##  @ingroup kernel
 ## 
@@ -1840,8 +1830,8 @@ proc libevdev_enable_event_code*(dev: ptr libevdev; `type`: cuint; code: cuint;
 ##  @see libevdev_has_event_code
 ##  @see libevdev_disable_event_type
 ## 
+proc libevdev_disable_event_code*(dev: ptr libevdev; `type`: cuint; code: cuint): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_disable_event_code*(dev: ptr libevdev; `type`: cuint; code: cuint): cint {.importc.}
 ## *
 ##  @ingroup kernel
 ## 
@@ -1856,13 +1846,11 @@ proc libevdev_disable_event_code*(dev: ptr libevdev; `type`: cuint; code: cuint)
 ## 
 ##  @see libevdev_enable_event_code
 ## 
+proc libevdev_kernel_set_abs_info*(dev: ptr libevdev; code: cuint; abs: ptr input_absinfo): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_kernel_set_abs_info*(dev: ptr libevdev; code: cuint;
-                                  abs: ptr input_absinfo): cint {.importc.}
 ## *
 ##  @ingroup kernel
 ## 
-
 type
   libevdev_led_value* = enum
     LIBEVDEV_LED_ON = 3,        ## *< Turn the LED on
@@ -1882,9 +1870,8 @@ type
 ##  @param value Specifies whether to turn the LED on or off
 ##  @return 0 on success, or a negative errno on failure
 ## 
-
-proc libevdev_kernel_set_led_value*(dev: ptr libevdev; code: cuint;
-                                   value: libevdev_led_value): cint {.importc.}
+proc libevdev_kernel_set_led_value*(dev: ptr libevdev; code: cuint; value: libevdev_led_value): cint {.importc, dynlib: LIBEVDEV.}
+                                   
 ## *
 ##  @ingroup kernel
 ## 
@@ -1908,8 +1895,8 @@ proc libevdev_kernel_set_led_value*(dev: ptr libevdev; code: cuint;
 ##  -1 to terminate the list.
 ##  @return 0 on success, or a negative errno on failure
 ## 
-
 proc libevdev_kernel_set_led_values*(dev: ptr libevdev): cint {.varargs, importc.}
+
 ## *
 ##  @ingroup kernel
 ## 
@@ -1924,8 +1911,8 @@ proc libevdev_kernel_set_led_values*(dev: ptr libevdev): cint {.varargs, importc
 ##  are CLOCK_MONOTONIC and CLOCK_REALTIME (the default).
 ##  @return 0 on success, or a negative errno on failure
 ## 
+proc libevdev_set_clock_id*(dev: ptr libevdev; clockid: cint): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_set_clock_id*(dev: ptr libevdev; clockid: cint): cint {.importc.}
 ## *
 ##  @ingroup misc
 ## 
@@ -1946,9 +1933,9 @@ proc libevdev_set_clock_id*(dev: ptr libevdev; clockid: cint): cint {.importc.}
 ## 
 ##  @return 1 if the event type matches the given type, 0 otherwise (or if
 ##  type is invalid)
-## 
+##
+proc libevdev_event_is_type*(ev: ptr input_event; `type`: cuint): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_event_is_type*(ev: ptr input_event; `type`: cuint): cint {.importc.}
 ## *
 ##  @ingroup misc
 ## 
@@ -1972,8 +1959,8 @@ proc libevdev_event_is_type*(ev: ptr input_event; `type`: cuint): cint {.importc
 ##  @return 1 if the event type matches the given type and code, 0 otherwise
 ##  (or if type/code are invalid)
 ## 
+proc libevdev_event_is_code*(ev: ptr input_event; `type`: cuint; code: cuint): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_event_is_code*(ev: ptr input_event; `type`: cuint; code: cuint): cint {.importc.}
 ## *
 ##  @ingroup misc
 ## 
@@ -1985,8 +1972,8 @@ proc libevdev_event_is_code*(ev: ptr input_event; `type`: cuint; code: cuint): c
 ##  @note The list of names is compiled into libevdev. If the kernel adds new
 ##  defines for new event types, libevdev will not automatically pick these up.
 ## 
+proc libevdev_event_type_get_name*(`type`: cuint): cstring {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_event_type_get_name*(`type`: cuint): cstring {.importc.}
 ## *
 ##  @ingroup misc
 ## 
@@ -1999,8 +1986,8 @@ proc libevdev_event_type_get_name*(`type`: cuint): cstring {.importc.}
 ##  @note The list of names is compiled into libevdev. If the kernel adds new
 ##  defines for new event codes, libevdev will not automatically pick these up.
 ## 
+proc libevdev_event_code_get_name*(`type`: cuint; code: cuint): cstring {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_event_code_get_name*(`type`: cuint; code: cuint): cstring {.importc.}
 ## *
 ##  @ingroup misc
 ## 
@@ -2014,8 +2001,8 @@ proc libevdev_event_code_get_name*(`type`: cuint; code: cuint): cstring {.import
 ##  @note On older kernels input properties may not be defined and
 ##  libevdev_property_get_name() will always return NULL
 ## 
+proc libevdev_property_get_name*(prop: cuint): cstring {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_property_get_name*(prop: cuint): cstring {.importc.}
 ## *
 ##  @ingroup misc
 ## 
@@ -2028,8 +2015,8 @@ proc libevdev_property_get_name*(prop: cuint): cstring {.importc.}
 ##  @note The max value is compiled into libevdev. If the kernel changes the
 ##  max value, libevdev will not automatically pick these up.
 ## 
+proc libevdev_event_type_get_max*(`type`: cuint): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_event_type_get_max*(`type`: cuint): cint {.importc.}
 ## *
 ##  @ingroup misc
 ## 
@@ -2044,8 +2031,8 @@ proc libevdev_event_type_get_max*(`type`: cuint): cint {.importc.}
 ## 
 ##  @note EV_MAX is also recognized.
 ## 
+proc libevdev_event_type_from_name*(name: cstring): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_event_type_from_name*(name: cstring): cint {.importc.}
 ## *
 ##  @ingroup misc
 ## 
@@ -2062,8 +2049,8 @@ proc libevdev_event_type_from_name*(name: cstring): cint {.importc.}
 ## 
 ##  @note EV_MAX is also recognized.
 ## 
+proc libevdev_event_type_from_name_n*(name: cstring; len: csize_t): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_event_type_from_name_n*(name: cstring; len: csize): cint {.importc.}
 ## *
 ##  @ingroup misc
 ## 
@@ -2083,8 +2070,8 @@ proc libevdev_event_type_from_name_n*(name: cstring; len: csize): cint {.importc
 ## 
 ##  @return The given code constant for the passed name or -1 if not found.
 ## 
+proc libevdev_event_code_from_name*(`type`: cuint; name: cstring): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_event_code_from_name*(`type`: cuint; name: cstring): cint {.importc.}
 ## *
 ##  @ingroup misc
 ## 
@@ -2106,8 +2093,8 @@ proc libevdev_event_code_from_name*(`type`: cuint; name: cstring): cint {.import
 ## 
 ##  @return The given code constant for the name or -1 if not found.
 ## 
+proc libevdev_event_code_from_name_n*(`type`: cuint; name: cstring; len: csize_t): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_event_code_from_name_n*(`type`: cuint; name: cstring; len: csize): cint {.importc.}
 ## *
 ##  @ingroup misc
 ## 
@@ -2120,8 +2107,8 @@ proc libevdev_event_code_from_name_n*(`type`: cuint; name: cstring; len: csize):
 ## 
 ##  @return The given code constant for the name or -1 if not found.
 ## 
+proc libevdev_property_from_name*(name: cstring): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_property_from_name*(name: cstring): cint {.importc.}
 ## *
 ##  @ingroup misc
 ## 
@@ -2136,8 +2123,8 @@ proc libevdev_property_from_name*(name: cstring): cint {.importc.}
 ## 
 ##  @return The given code constant for the name or -1 if not found.
 ## 
+proc libevdev_property_from_name_n*(name: cstring; len: csize_t): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_property_from_name_n*(name: cstring; len: csize): cint {.importc.}
 ## *
 ##  @ingroup bits
 ## 
@@ -2155,5 +2142,145 @@ proc libevdev_property_from_name_n*(name: cstring; len: csize): cint {.importc.}
 ## 
 ##  @see libevdev_get_event_value
 ## 
+proc libevdev_get_repeat*(dev: ptr libevdev; delay: ptr cint; period: ptr cint): cint {.importc, dynlib: LIBEVDEV.}
 
-proc libevdev_get_repeat*(dev: ptr libevdev; delay: ptr cint; period: ptr cint): cint {.importc.}
+
+type
+  libevdev_uinput* = object
+
+
+const LIBEVDEV_UINPUT_OPEN_MANAGED* = -2
+
+## *
+##  @ingroup uinput
+##
+##  Create a uinput device based on the given libevdev device. 
+##
+##  The uinput device will be an exact copy of the libevdev device,
+##  minus the bits that uinput doesn't allow to be set.
+##
+##  If uinput_fd is LIBEVDEV_UINPUT_OPEN_MANAGED, libevdev_uinput_create_from_device()
+##  will open /dev/uinput in read/write mode and manage the file
+##  descriptor. Otherwise, uinput_fd must be opened by the caller and
+##  opened with the appropriate permissions.
+##
+##  The device's lifetime is tied to the uinput file descriptor,
+##  closing it will destroy the uinput device. You should call libevdev_uinput_destroy()
+##  before closing the file descriptor to free allocated resources.
+##  A file descriptor can only create one uinput device at a time;
+##  the second device will fail with -EINVAL.
+##
+##  You don't need to keep the file descriptor variable around, libevdev_uinput_get_fd()
+##  will return it when needed.
+##
+##  @note Due to limitations in the uinput kernel module, REP_DELAY
+##  and REP_PERIOD will default to the kernel defaults, not to the
+##  ones set in the source device.
+##  @note On FreeBSD, if the UI_GET_SYSNAME ioctl() fails, there is
+##  no other way to get a device, and the function call will fail.
+##
+##  @param dev The device to duplicate.
+##  @param uinput_fd LIBEVDEV_UINPUT_OPEN_MANAGED or a file descriptor
+##  to /dev/uinput
+##  @param uinput_dev The newly created libevdev device.
+##
+##  @return 0 on success or a negative errno on failure. On failure, the value of uinput_dev is unmodified.
+##
+##  @see libevdev_uinput_destroy
+##
+proc libevdev_uinput_create_from_device*(dev: ptr libevdev; fd: cint; uinput_dev: ptr ptr libevdev_uinput): cint {.importc, dynlib: LIBEVDEV.}
+
+## *
+##  @ingroup uinput
+##
+##  Destroy a previously created uinput device and free associated memory. 
+##
+##  If the device was opened with LIBEVDEV_UINPUT_OPEN_MANAGED,
+##  libevdev_uinput_destroy() also closes the file descriptor. Otherwise,
+##  the fd is left as-is and must be closed by the caller.
+##
+##  @param uinput_dev A previously created uinput device.
+##
+proc libevdev_uinput_destroy*(uinput_dev: ptr libevdev_uinput) {.importc, dynlib: LIBEVDEV.}
+
+## *
+##  @ingroup uinput
+##
+##  Return the device node representing this uinput device. 
+##
+##  This relies on libevdev_uinput_get_syspath() to provide a valid syspath.
+##  See libevdev_uinput_get_syspath() for more details.
+##
+##  @note This function may return NULL. libevdev may have to guess the syspath
+##  and the device node. See libevdev_uinput_get_syspath() for details.
+##  @note On FreeBSD, this function can not return NULL. libudev uses the
+##  UI_GET_SYSNAME ioctl to get the device node on this platform and if that
+##  fails, the call to libevdev_uinput_create_from_device() fails.
+##
+##  @param uinput_dev A previously created uinput device.
+##
+##  @return The device node for this device, in the form of /dev/input/eventN
+##
+##  @see libevdev_uinput_get_syspath
+##
+proc libevdev_uinput_get_devnode*(uinput_dev: ptr libevdev_uinput) {.importc, dynlib: LIBEVDEV.}
+
+## *
+##  @ingroup uinput
+##
+##  Return the file descriptor used to create this uinput device. 
+##
+##  This is the fd pointing to /dev/uinput. This file descriptor may be
+##  used to write events that are emitted by the uinput device. Closing
+##  this file descriptor will destroy the uinput device, you should call
+##  libevdev_uinput_destroy() first to free allocated resources..
+##
+##  @param uinput_dev A previously created uinput device.
+##
+##  @return The file descriptor used to create this device 
+##
+proc libevdev_uinput_get_fd*(uinput_dev: ptr libevdev_uinput) {.importc, dynlib: LIBEVDEV.}
+
+## *
+##  @ingroup uinput
+##
+##  Return the syspath representing this uinput device.
+##
+##  If the UI_GET_SYSNAME ioctl is not available, libevdev makes an educated
+##  guess. The UI_GET_SYSNAME ioctl is available since Linux 3.15.
+##
+##  The syspath returned is the one of the input node itself (e.g. /sys/devices/virtual/input/input123),
+##  not the syspath of the device node returned with libevdev_uinput_get_devnode()
+##
+##  @note This function may return NULL if UI_GET_SYSNAME is not available.
+##  In that case, libevdev uses ctime and the device name to guess devices.
+##  To avoid false positives, wait at least 1.5s between creating devices that
+##  have the same name.
+##  @note FreeBSD does not have sysfs, on FreeBSD this function always returns NULL.
+##
+##  @param uinput_dev A previously created uinput device.
+##
+##  @return The syspath for this device, including the preceding /sys
+##
+##  @see libevdev_uinput_get_devnode
+##
+proc libevdev_uinput_get_syspath*(uinput_dev: ptr libevdev_uinput) {.importc, dynlib: LIBEVDEV.}
+
+## *
+##  @ingroup uinput
+##
+##  Post an event through the uinput device.
+##
+##  It is the caller's responsibility that any event sequence is terminated with
+##  an EV_SYN/SYN_REPORT/0 event. Otherwise, listeners on the device node will
+##  not see the events until the next EV_SYN event is posted.
+##
+##  @param uinput_dev A previously created uinput device.
+##  @param type Event type (EV_ABS, EV_REL, etc.)
+##  @param code Event code (ABS_X, REL_Y, etc.)
+##  @param value The event value
+##
+##  @return 0 on success or a negative errno on error 
+##
+proc libevdev_uinput_write_event*(uinput_dev: ptr libevdev_uinput; `type`: int; code: int; value: int) {.importc, dynlib: LIBEVDEV.}
+
