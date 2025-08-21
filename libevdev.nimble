@@ -1,4 +1,5 @@
 # Package
+packageName   = "libevdev"
 version       = "0.2.0"
 author        = "PassiveLemon"
 description   = "Wrapper for libevdev"
