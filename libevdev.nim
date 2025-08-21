@@ -23,6 +23,7 @@
 const LIBEVDEV = "libevdev.so"
 
 import ./linux/input
+export input
 
 ## *
 ##  @mainpage
